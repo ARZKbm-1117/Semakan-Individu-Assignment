@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Semakan Markah Pelajar Matrikulasi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#080d1a'
+                        },
+                        crimson: {
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .pdf-page-simulate {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #dc2626 100%);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Navigation Header -->
+    <header class="gradient-header text-white shadow-lg sticky top-0 z-30 border-b-4 border-crimson-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-navy-900 shadow-md border-2 border-crimson-600 font-black text-xl">
+                    <i class="fa-solid fa-graduation-cap text-crimson-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-tight leading-none text-white">SISTEM SEMAKAN MARKAH</h1>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium tracking-wide">Kolej Matrikulasi Johor• Jabatan Matematik</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-navy-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Sesi Akademik 2026/2027</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        
+        <!-- Banner / Intro Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-crimson-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-navy-900/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10 max-w-3xl">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-crimson-50 text-crimson-700 border border-crimson-200 mb-3">
+                    <i class="fa-solid fa-circle-info"></i> Semakan Rasmi Markah Tugasan
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-navy-900 mb-2">Semak Keputusan & Muat Turun Slip Laporan PDF</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    Sila masukkan **Nombor Matrik** (contoh: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-crimson-600 font-semibold">MS2616116907</code>) atau **Nama Pelajar** untuk melihat pecahan markah TI, Numerical Skill, Jumlah Markah dan pautan dokumen laporan PDF anda.
+                </p>
+            </div>
+        </div>
+
+        <!-- Search Controls Card -->
+        <div class="bg-navy-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl mb-8 relative">
+            <label for="searchInput" class="block text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wider">
+                <i class="fa-solid fa-magnifying-glass text-crimson-500 mr-2"></i>Carian Pelajar (No. Matrik / Nama)
+            </label>
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Masukkan No Matrik atau Nama Pelajar..." 
+                    class="w-full bg-white text-slate-900 pl-12 pr-28 py-4 rounded-xl text-base sm:text-lg focus:outline-none focus:ring-4 focus:ring-crimson-500 shadow-inner font-medium transition"
+                    onkeyup="handleSearch()"
+                    autocomplete="off"
+                >
+                <i class="fa-solid fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
+                <button 
+                    onclick="clearSearch()" 
+                    id="clearBtn"
+                    class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                >
+                    <i class="fa-solid fa-xmark mr-1"></i> Padam
+                </button>
+            </div>
+
+            <!-- Autocomplete suggestions container -->
+            <div id="suggestions" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 max-h-60 overflow-y-auto text-slate-800"></div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+                <div>
+                    <i class="fa-solid fa-database text-crimson-500 mr-1"></i> Pangkalan Data: <strong id="totalRecordsCount" class="text-white">95</strong> Pelajar Berdaftar
+                </div>
+                <div>
+                    <i class="fa-solid fa-chalkboard-user text-amber-400 mr-1"></i> Pensyarah: <strong class="text-white">ABDUL RAZAK BIN AZIT</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Display Area -->
+        <div id="resultContainer" class="min-h-[250px]">
+            <!-- Initial Empty State -->
+            <div id="emptyState" class="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+                <h3 class="text-lg font-bold text-navy-900 mb-1">Sila Buat Carian Rekod Pelajar</h3>
+                <p class="text-slate-500 text-sm max-w-md mx-auto">
+                    Masukkan No Matrik atau Nama Pelajar di dalam ruangan carian di atas untuk memaparkan senarai markah dan slip PDF.
+                </p>
+            </div>
+
+            <!-- Student Card Output (Injected dynamically) -->
+            <div id="studentCard" class="hidden"></div>
+            
+            <!-- Multiple Results Table (Injected if search query is broad) -->
+            <div id="multipleResultsList" class="hidden"></div>
+        </div>
+
+    </main>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdfModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white w-full max-w-5xl h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-300 animate-in fade-in zoom-in duration-200">
+            
+            <!-- Modal Header -->
+            <div class="bg-navy-900 text-white px-6 py-4 flex items-center justify-between border-b-2 border-crimson-600">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-10 h-10 bg-crimson-600 text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold">
+                        <i class="fa-solid fa-file-pdf text-xl"></i>
+                    </div>
+                    <div class="truncate">
+                        <h3 id="modalPdfTitle" class="font-bold text-base sm:text-lg text-white truncate">Dokumen Laporan Pelajar.pdf</h3>
+                        <p id="modalStudentMeta" class="text-xs text-slate-300 truncate">Sistem Semakan Laporan • Kolej Matrikulasi</p>
+                    </div>
+                </div>
+                <button onclick="closePdfModal()" class="w-9 h-9 bg-navy-800 hover:bg-crimson-600 text-slate-300 hover:text-white rounded-lg flex items-center justify-center transition flex-shrink-0 ml-2">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Action Toolbar -->
+            <div class="bg-slate-100 px-6 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+                <div class="flex items-center space-x-2 text-slate-600">
+                    <span class="bg-slate-200 px-2.5 py-1 rounded font-mono font-medium text-slate-700">PDF Viewer v2.4</span>
+                    <span class="hidden sm:inline">• Pratanjal Paparan Rasmi Dokumen</span>
+                </div>
+                <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                    <button onclick="printPdfDocument()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-sm">
+                        <i class="fa-solid fa-print"></i> <span>Cetak</span>
+                    </button>
+                    <button onclick="openPdfNewTab()" class="bg-navy-800 hover:bg-navy-900 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-sm">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="hidden sm:inline">Buka di</span> Tab Baru
+                    </button>
+                    <button onclick="downloadPdfFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition shadow-sm">
+                        <i class="fa-solid fa-download"></i> <span>Muat Turun PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Simulated PDF Document Canvas Area -->
+            <div class="flex-grow bg-slate-200 p-4 sm:p-8 overflow-y-auto flex justify-center items-start">
+                <div id="pdfSimulationPage" class="pdf-page-simulate bg-white w-full max-w-3xl min-h-[750px] p-8 sm:p-12 rounded-sm border border-slate-300 text-slate-800 flex flex-col justify-between relative my-auto">
+                    
+                    <!-- Watermark -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+                        <i class="fa-solid fa-graduation-cap text-[280px]"></i>
+                    </div>
+
+                    <!-- Top Header Section of PDF -->
+                    <div>
+                        <div class="flex justify-between items-start border-b-2 border-navy-900 pb-6 mb-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-navy-900 text-white flex items-center justify-center rounded-lg font-black text-2xl border-2 border-crimson-600">
+                                    KM
+                                </div>
+                                <div>
+                                    <h2 class="font-black text-lg sm:text-xl text-navy-900 tracking-tight leading-tight">KOLEJ MATRIKULASI MALAYSIA</h2>
+                                    <p class="text-xs text-slate-600 font-semibold uppercase tracking-wider">Kementerian Pendidikan Malaysia</p>
+                                    <p class="text-xs text-crimson-600 font-bold mt-0.5">SLIP LAPORAN MARKAH TUGASAN MATEMATIK</p>
+                                </div>
+                            </div>
+                            <div class="text-right text-xs text-slate-500 font-mono">
+                                <div>TARIKH CETAKAN:</div>
+                                <div class="font-bold text-slate-800" id="pdfCurrentDate">19/09/2026</div>
+                                <div class="mt-1 text-[10px] bg-slate-100 px-2 py-0.5 rounded border border-slate-300 text-emerald-700 font-bold inline-block">RASMI / DISAHKAN</div>
+                            </div>
+                        </div>
+
+                        <!-- Student Particulars Grid -->
+                        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 mb-6">
+                            <h4 class="text-xs font-bold text-navy-900 uppercase tracking-wider border-b border-slate-200 pb-2 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-user-gear text-crimson-600"></i> Maklumat Profil Pelajar
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                                <div>
+                                    <span class="text-xs text-slate-500 block">Nama Pelajar:</span>
+                                    <span id="pdfStudentName" class="font-bold text-navy-900">NAMA PELAJAR</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-500 block">No. Matrik:</span>
+                                    <span id="pdfStudentMatrik" class="font-mono font-bold text-crimson-600">MS00000000</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-500 block">Praktikum / Kumpulan:</span>
+                                    <span id="pdfStudentPraktikum" class="font-semibold text-slate-800">H24</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-500 block">No. Set Soalan:</span>
+                                    <span id="pdfStudentSet" class="font-semibold text-slate-800">SET 1</span>
+                                </div>
+                                <div class="sm:col-span-2 pt-2 border-t border-slate-200">
+                                    <span class="text-xs text-slate-500 block">Nama Pensyarah:</span>
+                                    <span id="pdfStudentLecturer" class="font-bold text-navy-900">ABDUL RAZAK BIN AZIT</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Table -->
+                        <div class="mb-6">
+                            <h4 class="text-xs font-bold text-navy-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-bar text-crimson-600"></i> Perincian Markah Pentaksiran
+                            </h4>
+                            <table class="w-full border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-navy-900 text-white text-left">
+                                        <th class="p-3 rounded-tl-lg font-semibold">Komponen Penilaian</th>
+                                        <th class="p-3 text-center font-semibold">Markah Penuh</th>
+                                        <th class="p-3 text-right rounded-tr-lg font-semibold">Markah Diperolehi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 border-x border-b border-slate-200">
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-3 font-medium text-slate-800">Markah TI (Tugasan Individu)</td>
+                                        <td class="p-3 text-center font-mono text-slate-500">45</td>
+                                        <td id="pdfScoreTI" class="p-3 text-right font-mono font-bold text-navy-900">0.0</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-3 font-medium text-slate-800">Numerical Skill</td>
+                                        <td class="p-3 text-center font-mono text-slate-500">5</td>
+                                        <td id="pdfScoreNum" class="p-3 text-right font-mono font-bold text-navy-900">0.0</td>
+                                    </tr>
+                                    <tr class="bg-slate-100/80 font-bold">
+                                        <td class="p-3 text-navy-900">JUMLAH KESELURUHAN</td>
+                                        <td class="p-3 text-center font-mono text-slate-700">50</td>
+                                        <td id="pdfScoreTotal" class="p-3 text-right font-mono text-lg text-crimson-600">0.0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Grade Box -->
+                        <div class="bg-gradient-to-r from-navy-900 to-slate-800 text-white p-5 rounded-xl flex items-center justify-between mb-8 shadow-md">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-300 font-semibold block">Keputusan Pangkat / Gred:</span>
+                                <div id="pdfGradeTitle" class="text-xl font-black text-amber-400">GRED A (CEMERLANG)</div>
+                            </div>
+                            <div id="pdfGradeBadge" class="w-14 h-14 bg-white text-navy-900 rounded-full flex items-center justify-center font-black text-2xl shadow">
+                                A
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Footer Section of PDF -->
+                    <div class="border-t border-slate-200 pt-6 mt-6">
+                        <div class="flex justify-between items-end text-xs text-slate-500">
+                            <div>
+                                <p class="font-bold text-slate-700">Nama Fail Dokumen:</p>
+                                <p id="pdfFileName" class="font-mono text-slate-600">file_name.pdf</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="italic">Dokumen ini dicetuskan secara automatik oleh</p>
+                                <p class="font-semibold text-navy-900">Sistem Semakan Markah Pelajar Matrikulasi</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-navy-950 text-slate-400 border-t border-slate-800 py-6 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-medium text-slate-300 mb-1">© 2026 Kolej Matrikulasi • Hak Cipta Terpelihara</p>
+            <p class="text-slate-500">Pereka Bentuk Sistem & Data Pensyarah: <span class="text-slate-300">ABDUL RAZAK BIN AZIT</span></p>
+        </div>
+    </footer>
+
+    <script>
+        // Full Student Database (95 Student Records)
+        const studentDatabase = [
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ADRIANA AINUL HAYAT BINTI MUHAMMAD NOR FADZLI", matrik: "MS2616116907", praktikum: "H24", set: "SET 1", pdf: "SET1_H24_ADRIANA - AdrianaAinul Hayat.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AMINAH FATIMAH BINTI ROSLI", matrik: "MS2616204097", praktikum: "H24", set: "SET 1", pdf: "SET1_H24_AMINAH - AMINAH FATIMAH BINTI ROSLI KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "BALQIS SAFIYYAH BINTI ZAINAL ABIDIN", matrik: "MS2616116438", praktikum: "H24", set: "SET 1", pdf: "ilovepdf_merged (1) - BALQIS SAFIYYAH BINTI ZAINAL ABIDIN KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD RYAN AFFIE BIN MOHD SAIFUL AFFENDY", matrik: "MS2616117328", praktikum: "H24", set: "SET 1", pdf: "SET 1_H24_RYAN AFFIE - MUHAMMAD RYAN AFFIE BIN MOHD SAIFUL AFFENDY KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR IFFAH ZARIFAH BINTI MOHD.HIDZAM", matrik: "MS2616116269", praktikum: "H24", set: "SET 1", pdf: "SET1_H24_IFFAH - iffah zarifah mh.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR INSYIRAH NAZIRAH BINTI AZMAN", matrik: "MS2616117503", praktikum: "H24", set: "SET 1", pdf: "SET 1_H24_NUR INSYIRAH NAZIRAH - NUR INSYIRAH NAZIRAH BINTI AZMAN KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURUL KHADIJAH BINTI ABDUL HALIM", matrik: "MS2616117896", praktikum: "H24", set: "SET 1", pdf: "SET1_H24_NURULKHADIJAHBINTIABDULHALIM - NURUL KHADIJAH BINTI ABDUL HALIM KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SITI NURAFINA BINTI MOHAMAD NORIZAN", matrik: "MS2616117384", praktikum: "H24", set: "SET 1", pdf: "SET1_H24_NURAFINA - SITI NURAFINA BINTI MOHAMAD NORIZAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "CHIA JIA HONG", matrik: "MS2616117372", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_CHIA JIA HONG 2(1) - CHIA JIA HONG KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "HASWEENA ARIYANA BINTI MOHD HAZANI", matrik: "MS2616117455", praktikum: "H24", set: "SET 2", pdf: "SET2-H24-HASWEENA ARIYANA - HASWEENA ARIYANA BINTI MOHD HAZANI KM-Pelajar", ti: 43, num: 4, total: 47 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "HO KAI WEN", matrik: "MS2616190173", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_HO KAI WEN - HO KAI WEN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURIN IZZAH IRDINA BINTI ZUBIR", matrik: "MS2616116123", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_NURIN IZZAH IRDINA - NURIN IZZAH IRDINA BINTI ZUBIR KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "QUEE LI MING", matrik: "MS2616116682", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_QUEE LI MING (1) - QUEE LI MING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SHASA EZATI BINTI AHMAD SHABRI", matrik: "MS2616116437", praktikum: "H24", set: "SET 2", pdf: "SET2_H24_SHASA EZATI 2 - SHASA EZATI BINTI AHMAD SHABRI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SUJITHRAN A/L SIVAK KUMAR", matrik: "MS2616117857", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_SUJITHRAN - SUJITHRAN A/L SIVAK KUMAR KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TEOH JAELYN", matrik: "MS2616400263", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_TEOH JAELYN - TEOH JAELYN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TEY CHU XIN", matrik: "MS2616117135", praktikum: "H24", set: "SET 2", pdf: "SET 2_H24_TEY CHU XIN - TEY CHU XIN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AMANINA IZZATI BINTI MUHAMMAD HAKIM", matrik: "MS2616117370", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_AMANINA IZZATI - AMANINA IZZATI BINTI MUHAMMAD HAKIM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "CHARMAINE TEH JING XUAN", matrik: "MS2616116574", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_CHARMAINE TEH - CHARMAINE TEH JING XUAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "CHONG JING TAO", matrik: "MS2616115869", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_CHONG JING TAO 3 - CHONG JING TAO KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ENOCH WONG BA XUAN", matrik: "MS2616116411", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_ENOCH_WONG_BA_XUAN - ENOCH WONG BA XUAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "KOK YI MUN", matrik: "MS2616117115", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_KOK YI MUN - KOK YI MUN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LEONG ZHI XUAN", matrik: "MS2616190166", praktikum: "H24", set: "SET 3", pdf: "Set 3_H24_Leong Zhi Xuan - LEONG ZHI XUAN KM-Pelajar.pdf", ti: 43, num: 4.5, total: 47.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NG DANCY", matrik: "MS2616117786", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_NG DANCY - NG DANCY KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURHAZIQAH BINTI NORDIN", matrik: "MS2616117392", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_NURHAZIQAH - NURHAZIQAH BINTI NORDIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SOFIA NUR IMANINA BINTI JAZMI", matrik: "MS2616204198", praktikum: "H24", set: "SET 3", pdf: "SET 3_H24_SOFIA NUR IMANINA 08-07-2026 21-54-18 - SOFIA NUR IMANINA BINTI JAZMI KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AMNI NAFISAH BINTI AMRAN", matrik: "MS2616117329", praktikum: "H25", set: "SET 1", pdf: "SET1_H25_amni_ maths assignment - AMNI NAFISAH BINTI AMRAN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "HAZIQ DANIEL BIN AZRIN", matrik: "MS2616116010", praktikum: "H25", set: "SET 1", pdf: "SET 1_H25_HAZIQ - HAZIQ DANIEL BIN AZRIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "KOH LI YUE", matrik: "MS2616117931", praktikum: "H25", set: "SET 1", pdf: "SET 1_H25_KOH LI YUE - Li Yue Koh.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MICHELLE TAN CHAI YUN", matrik: "MS2616117569", praktikum: "H25", set: "SET 1", pdf: "Math assignment - MICHELLE TAN CHAI YUN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD HANEEF BIN SAMAD", matrik: "MS2616116774", praktikum: "H25", set: "SET 1", pdf: "SET 1_H25_HANEEF - MUHAMMAD HANEEF BIN SAMAD KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR SYAHIDATUN NAJWA BINTI MOHAMAD JOHAN", matrik: "MS2616117206", praktikum: "H25", set: "SET 1", pdf: "SET 1_H25_NUR SYAHIDATUN NAJWA 29-Jul-2026 19-16-23 - NUR SYAHIDATUN NAJWA BINTI MOHAMAD JOHAN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SYARAH DAMIA BINTI MOHAMAD NIZAM", matrik: "MS2616116445", praktikum: "H25", set: "SET 1", pdf: "CamScanner 07-08-2026 22.38 - SYARAH DAMIA BINTI MOHAMAD NIZAM KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TOH SHY ROU", matrik: "MS2616117789", praktikum: "H25", set: "SET 1", pdf: "SET1_H25_TOH SHY ROU - TOH SHY ROU KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AMMAR ALKHALEEQ BIN MOHAMAD ALBASRI", matrik: "MS2616116397", praktikum: "H25", set: "SET 2", pdf: "SET2_H25_AMMAR - AMMAR ALKHALEEQ BIN MOHAMAD ALBASRI KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "CHAN SHENG RU", matrik: "MS2616116945", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_CHAN SHENG RU - CHAN SHENG RU KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "GOO JUN LONG", matrik: "MS2616116647", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_GOO JUN LONG (2) - GOO JUN LONG KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "JANU A/P SATHIAN", matrik: "MS2616117217", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_JANU - JANU A/P SATHIAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR ARFAH QISTINA BINTI RAZIEE EFINNDIEE", matrik: "MS2616204177", praktikum: "H25", set: "SET 2", pdf: "Doc 08-07-2026 22-26-31 - NUR ARFAH QISTINA BINTI RAZIEE EFINNDIEE KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR AZUREEN BASYIRAH BINTI MOHD TAUFIK", matrik: "MS2616117408", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_AZUREEN - NUR AZUREEN BASYIRAH BINTI MOHD TAUFIK KM-Pelajar", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR HIDAYAH SOFEA BINTI ABDULLAH", matrik: "MS2616116001", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_NURHIDAYAHSOFEA - NUR HIDAYAH SOFEA BINTI ABDULLAH KM-Pelajar.pdf", ti: 44, num: 4, total: 48 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TAN CHU TING", matrik: "MS2616117785", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_TAN CHU TING. - TAN CHU TING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "WONG YU XUAN", matrik: "MS2616117897", praktikum: "H25", set: "SET 2", pdf: "SET 2_H25_WONG YU XUAN - WONG YU XUAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ALYAA AFIQAH BINTI ANUAR", matrik: "MS2616117207", praktikum: "H25", set: "SET 3", pdf: "SET3_H25_ALYAA AFIQAH - ALYAA AFIQAH BINTI ANUAR KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LIM YI EN", matrik: "MS2616117778", praktikum: "H25", set: "SET 3", pdf: "SET 3_H25_LIM YI EN - LIM YI EN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LIM ZHI YI", matrik: "MS2616117369", praktikum: "H25", set: "SET 3", pdf: "SET3_H25_LIM ZHI YI - LIM ZHI YI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LIW YOU MING", matrik: "MS2616117877", praktikum: "H25", set: "SET 3", pdf: "SET 3_H25_ LIW YOU MING - LIW YOU MING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR ATHIRAH BINTI MOHD SHAIFUL", matrik: "MS2616116835", praktikum: "H25", set: "SET 3", pdf: "SET3_ATHIRAH_H25 (1) - NURUL NASRIYAH BINTI ABU BAKAR KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR HANIS FARHANAH BINTI NOR ISAM", matrik: "MS2616171997", praktikum: "H25", set: "SET 3", pdf: "SET 3_H25_HANIS. _20260807_232917_0000 - NUR HANIS FARHANAH BINTI NOR ISAM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURHANANIA DURRANI BINTI MOHD AZAM", matrik: "MS2616115736", praktikum: "H25", set: "SET 3", pdf: "DOC-20260807-WA0006 - NURHANANIA DURRANI BINTI MOHD AZAM KM-Pelajar.pdf", ti: 44, num: 3.5, total: 47.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURUL NASRIYAH BINTI ABU BAKAR", matrik: "MS2616116267", praktikum: "H25", set: "SET 3", pdf: "set 3_ nasriyah_ H25 - NURUL NASRIYAH BINTI ABU BAKAR KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "YONG DAI QIAN", matrik: "MS2616116617", praktikum: "H25", set: "SET 3", pdf: "DOC-20260807-WA0042 - YONG DAI QIAN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ANIS NASUHA BINTI ZAMRI", matrik: "MS2616116974", praktikum: "H26", set: "SET 1", pdf: "SET 1 _H26_ANIS - ANIS NASUHA BINTI ZAMRI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "FATIN RAZITA ZAHRA BINTI MUHAMMAD ZA`IM", matrik: "MS2616116345", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_FATIN RAZITA ZAHRA 2 - FATIN RAZITA ZAHRA BINTI MUHAMMAD ZA`IM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD AFIF HILMAN BIN AMRAN", matrik: "MS2616116021", praktikum: "H26", set: "SET 1", pdf: "SET1_H26_AFIF - MUHAMMAD AFIF HILMAN BIN AMRAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD SYAKIREZAIMAN BIN BAHRIM", matrik: "MS2616117268", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_SYAKIR - MUHAMMAD SYAKIREZAIMAN BIN BAHRIM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ONG LI YANG", matrik: "MS2616116609", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_ONG LI YANG - ONG LI YANG KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TAN YI ROU", matrik: "MS2616117821", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_TAN YI ROU - TAN YI ROU KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "THULASI A/P GUNALAN", matrik: "MS2616117487", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_THULASI (2) - THULASI A/P GUNALAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "WONG WAI NING", matrik: "MS2616117735", praktikum: "H26", set: "SET 1", pdf: "SET 1_H26_WONG WAI NING - WONG WAI NING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AHMAD SHAHIDIL AMIN BIN AZLIM", matrik: "MS2616116306", praktikum: "H26", set: "SET 2", pdf: "SET2_H26_SHAHIDIL 07-Aug-2026 23-06-57 - AHMAD SHAHIDIL AMIN BIN AZLIM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AISYAH MUNAWWARAH BINTI CHE AHMAD", matrik: "MS2616116825", praktikum: "H26", set: "SET 2", pdf: "SET2_H26_AISYAHMUNAWWARAH - AISYAH MUNAWWARAH BINTI CHE AHMAD KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "BEH QIAN HUI", matrik: "MS2616116598", praktikum: "H26", set: "SET 2", pdf: "SET 2_H26_BEH QIAN HUI - BEH QIAN HUI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LEE YU TING", matrik: "MS2616117802", praktikum: "H26", set: "SET 2", pdf: "SET 2_H26_LEE YU TING - LEE YU TING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LOW SHUEN YA", matrik: "MS2616117460", praktikum: "H26", set: "SET 2", pdf: "SET 2_H26_LOW SHUEN YA - LOW SHUEN YA KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD DANIAL BIN ABDUL RAHMAN", matrik: "MS2616117137", praktikum: "H26", set: "SET 2", pdf: "SET2_H26_DANIAL - MUHAMMAD DANIAL BIN ABDUL RAHMAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR SOFIA NAJWA BINTI MD SAFAREEN", matrik: "MS2616115977", praktikum: "H26", set: "SET 2", pdf: "SET2_H26_NUR SOFIA NAJWA BINTI MD SAFAREEN - NUR SOFIA NAJWA BINTI MD SAFAREEN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SAJAA SAMIIHAH BINTI MOHD SUHAIZAN", matrik: "MS2616204013", praktikum: "H26", set: "SET 2", pdf: "SET 2_H26_SAJAA - SAJAA SAMIIHAH BINTI MOHD SUHAIZAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TAN PEI XIN", matrik: "MS2616117580", praktikum: "H26", set: "SET 2", pdf: "SET 2_H26_TAN PEI XIN - TAN PEI XIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "FATIN NASUHA BINTI NAZRI", matrik: "MS2616116979", praktikum: "H26", set: "SET 3", pdf: "SET3_ H26_FATIN NASUHA - FATIN NASUHA BINTI NAZRI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "JANICE LEE SZE XUN", matrik: "MS2616116547", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_JANICE LEE SZE XUN (grayscale) (pdfresizer.com) - JANICE LEE SZE XUN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NISHA A/P SURESH KUMAR", matrik: "MS2616117445", praktikum: "H26", set: "SET 3", pdf: "SET3_H26_NISHA AP SURESH KUMAR - NISHA A/P SURESH KUMAR KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NOOR AFIFAH BINTI IRUL", matrik: "MS2616117765", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_NOOR AFIFAH - NOOR AFIFAH BINTI IRUL KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR FITHRIAH ADAWIYAH BINTI MOHD SUHAZAN", matrik: "MS2616117836", praktikum: "H26", set: "SET 3", pdf: "SET3_H26_FITHRIAH. - NUR FITHRIAH ADAWIYAH BINTI MOHD SUHAZAN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR IZZAH BINTI NAHARUDDIN", matrik: "MS2616117554", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_IZZAH - NUR IZZAH BINTI NAHARUDDIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "PUTERI NADIA NADHIRAH BINTI KHAIRIL ADZHAR", matrik: "MS2616115793", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_NADIA - PUTERI NADIA NADHIRAH BINTI KHAIRIL ADZHAR KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SYAZANA ATIKAH BATRISYIA BINTI JAFFAR", matrik: "MS2616116037", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_SYAZANA - SYAZANA ATIKAH BATRISYIA BINTI JAFFAR KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "YEO XIN NING", matrik: "MS2616116620", praktikum: "H26", set: "SET 3", pdf: "SET 3_H26_YEO XIN NING - YEO XIN NING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AHMAD AIZUDDIN BIN AHMAD KHAIRUL ANUAR", matrik: "MS2616117523", praktikum: "H27", set: "SET 1", pdf: "SET 1_H27_AIZUDDIN-1 - AHMAD AIZUDDIN BIN AHMAD KHAIRUL ANUAR KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AISYAH HUMAIRA BINTI MOHD REDZUAN", matrik: "MS2616116263", praktikum: "H27", set: "SET 1", pdf: "AISYAH HUMAIRA H27_202608072351_51652(2) - AISYAH HUMAIRA BINTI MOHD REDZUAN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ALYA FARZANA BINTI ROSMIZAN", matrik: "MS2616116600", praktikum: "H27", set: "SET 1", pdf: "SET1_H27_ALYA - ALYA FARZANA BINTI ROSMIZAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "CHEW JIA XIAN", matrik: "MS2616190164", praktikum: "H27", set: "SET 1", pdf: "SET 1 _H27_CHEW JIA XIAN - CHEW JIA XIAN KM-Pelajar.pdf", ti: 44, num: 4, total: 48 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "FARAH ASHIKIN BINTI MOHAMAD TAUFEK", matrik: "MS2616117824", praktikum: "H27", set: "SET 1", pdf: "SET 1_H27_FARAH (1) - FARAH ASHIKIN BINTI MOHAMAD TAUFEK KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR QISTINA BINTI HUZAIRUL AZRIN", matrik: "MS2616115918", praktikum: "H27", set: "SET 1", pdf: "Assignment Math_Set 1_H27 07-Aug-2026 21-56-17 - Qistina.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SHARIFAH HUMAIRA MAISARA BINTI SYED MUZAMIR", matrik: "MS2616117158", praktikum: "H27", set: "SET 1", pdf: "SET 1_H27_SHARIFAH HUMAIRA MAISARA BINTI SYED MUZAMIR - SHARIFAH HUMAIRA MAISARA BINTI SYED MUZAMIR KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TEOH JIN SHUEN", matrik: "MS2616116921", praktikum: "H27", set: "SET 1", pdf: "SET 1 - TEOH JIN SHUEN H27 - TEOH JIN SHUEN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ADEEL BIN KHALIL", matrik: "MS2616117124", praktikum: "H27", set: "SET 2", pdf: "SET 2_H27_ADEEL - ADEEL BIN KHALIL Moe.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "HOO YEE FEI", matrik: "MS2616116183", praktikum: "H27", set: "SET 2", pdf: "SET 2_H27_HOO YEE FEI - HOO YEE FEI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "JOANNA A/P SOOSAI MAARAN", matrik: "MS2616117380", praktikum: "H27", set: "SET 2", pdf: "SET 2_H27_JOANNA(1) - JOANNA A/P SOOSAI MAARAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LIM ENN RU", matrik: "MS2616117886", praktikum: "H27", set: "SET 2", pdf: "SET2_H27_LIM ENN RU (1) - LIM ENN RU KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ONG XIN YI", matrik: "MS2616117591", praktikum: "H27", set: "SET 2", pdf: "SET 2_H27_ONG XIN YI - ONG XIN YI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "RISKI ENG BIN MOHAMMAD RIDWAN", matrik: "MS2616115787", praktikum: "H27", set: "SET 2", pdf: "SET2_H27_RISKI-1 - RISKI ENG BIN MOHAMMAD RIDWAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "WAN AHMAD NAZAAR ISLAM BIN WAN ZAINAL", matrik: "MS2616116747", praktikum: "H27", set: "SET 2", pdf: "SET 2_H27_WANAHMAD - WAN AHMAD NAZAAR ISLAM BIN WAN ZAINAL KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AINI QAISUM BINTI JAAFAR", matrik: "MS2616116623", praktikum: "H27", set: "SET 3", pdf: "SET 3 H27 AINI - NUR ALMESYA FITRI FATAHANNY BINTI TANSI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ASARUNNISAH BINTI KATHIR", matrik: "MS2616116075", praktikum: "H27", set: "SET 3", pdf: "SET3_H27 _ASARUNNISAH - ASARUNNISAH BINTI KATHIR KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "HOO XIN MIN", matrik: "MS2616117865", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_HOO XIN MIN - HOO XIN MIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD AIMAN HAFIZI BIN MOHD. ZAINAL", matrik: "MS2616117579", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_AIMAN HAFIZI - MUHAMMAD AIMAN HAFIZI BIN MOHD. ZAINAL KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR AMANI ELLYA BINTI ZAINUDIN", matrik: "MS2616117000", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_AMANI - NUR AMANI ELLYA BINTI ZAINUDIN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR SAKINAH BINTI MOHD KHAIRUDIN", matrik: "MS2616117325", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_NUR SAKINAH - NUR SAKINAH BINTI MOHD KHAIRUDIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURUL RAIHANA BINTI KHAIRULNIZAM", matrik: "MS2616203983", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_NURUL RAIHANA - NURUL RAIHANA BINTI KHAIRULNIZAM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ONG LI XUAN", matrik: "MS2616116336", praktikum: "H27", set: "SET 3", pdf: "SET 3_H27_ONG LI XUAN - ONG LI XUAN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SIA NI HONG", matrik: "MS2616115679", praktikum: "H27", set: "SET 3", pdf: "SET 3 - SIA NI HONG KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ALYA BATRISYIA BINTI AZHAR", matrik: "MS2616115846", praktikum: "H28", set: "SET 1", pdf: "SET 1_BATRISYIA_H28 (1)_copy - ALYA BATRISYIA BINTI AZHAR KM-Pelajar.pdf", ti: 43, num: 4.5, total: 47.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ASHLEYCA FERNANDEZ A/P JOHN", matrik: "MS2616117902", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_ASHLEYCA FERNANDEZ JOHN - Ashleyca Fernandez John.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "JOEY TAN ROU YI", matrik: "MS2616116614", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_JOEY TAN ROU YI - JOEY TAN ROU YI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "KOH XIN YAN", matrik: "MS2616117509", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_KOH XIN YAN - KOH XIN YAN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LAU FANG LING", matrik: "MS2616116309", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_LAU FANG LING - LAU FANG LING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD FAIZ HAKIMI BIN HISAMUDIN", matrik: "MS2616116482", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_MUHAMMAD FAIZ HAKIMI BIN HISAMUDIN-combined - MUHAMMAD FAIZ HAKIMI BIN HISAMUDIN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NURUL IMAN BINTI MOHD ZUNAIDI", matrik: "MS2616117059", praktikum: "H28", set: "SET 1", pdf: "SET 1_H28_NURUL IMAN - NURUL IMAN BINTI MOHD ZUNAIDI KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "AZURA NAJIHA BINTI AZMI", matrik: "MS2616116893", praktikum: "H28", set: "SET 2", pdf: "SET2_H28_AZURA - AZURA NAJIHA BINTI AZMI KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MARSYA NUR DAMIA BINTI MOHD YAZID", matrik: "MS2616115880", praktikum: "H28", set: "SET 2", pdf: "SET 2_H28_MARSYA - MARSYA NUR DAMIA BINTI MOHD YAZID KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD HAZIQ AMMAR BIN MOHD. ROSLI", matrik: "MS2616204113", praktikum: "H28", set: "SET 2", pdf: "SET 2_H28_AMMAR - QUEE LI MING KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD NUR ASNAWI BIN KHATA @ MOHD HATTA", matrik: "MS2616116426", praktikum: "H28", set: "SET 2", pdf: "SET2_H28_ASNAWI - MUHAMMAD NUR ASNAWI BIN KHATA @ MOHD HATTA KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NATASHA FAIROSA BINTI MUHAMMAD HISHAM", matrik: "MS2616116581", praktikum: "H28", set: "SET 2", pdf: "SET 2_H28_NATASHA FAIROSA - NATASHA FAIROSA BINTI MUHAMMAD HISHAM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR ZAHIRAH BINTI MOHD SAFIEE", matrik: "MS2616115810", praktikum: "H28", set: "SET 2", pdf: "SET2_H28_NURZAHIRAH - NUR ZAHIRAH BINTI MOHD SAFIEE KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "PANG YU YAN", matrik: "MS2616117250", praktikum: "H28", set: "SET 2", pdf: "SET 2_H28_PANG YU YAN - PANG YU YAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "SITI NURSYAFIQAH HANA BINTI MOHD HAIRULAZMI", matrik: "MS2616116016", praktikum: "H28", set: "SET 2", pdf: "SET2_H28_SITI NURSYAFIQAH HANA BINTI MOHD HAIRULAZMI - SITI NURSYAFIQAH HANA BINTI MOHD HAIRULAZMI KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "YARSHINI A/P MANICKAVASAGAM", matrik: "MS2616117822", praktikum: "H28", set: "SET 2", pdf: "SET 2_H28_YARSHINI MANICKAVASAGAM(7) - YARSHINI A/P MANICKAVASAGAM KM-Pelajar.pdf", ti: 45, num: 5, total: 50 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ALYA MARSYA BINTI FAUZI", matrik: "MS2416173875", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_ALYAMARSYAFAUZI - ALYA MARSYA BINTI FAUZI KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "ASTER SEE XIN HUI", matrik: "MS2616116660", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_ASTER (1) - ASTER SEE XIN HUI KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "KEK JING YANG", matrik: "MS2616190169", praktikum: "H28", set: "SET 3", pdf: "SET3_H28_KEK JING YANG - KEK JING YANG KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "LOH YEE VOON", matrik: "MS2616117800", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_LOH YEE VOON_ - LOH YEE VOON KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MOHAMAD NURIMAN HAKIMI BIN SABARIJAN", matrik: "MS2616115848", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_Hakimi - MOHAMAD NURIMAN HAKIMI BIN SABARIJAN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "MUHAMMAD ALIFF BIN JASLAN", matrik: "MS2616115987", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_MUHAMMAD ALIFF BIN JASLAN - MUHAMMAD ALIFF BIN JASLAN KM-Pelajar.pdf", ti: 44, num: 4.5, total: 48.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "NUR KAISAH BINTI NASRUN", matrik: "MS2616117105", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_NUR KAISAH - NUR KAISAH BINTI NASRUN KM-Pelajar.pdf", ti: 45, num: 4.5, total: 49.5 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "PUTRA MUHAMMAD SYAKIR BIN AZMAN", matrik: "MS2616116408", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_PUTRA - PUTRA MUHAMMAD SYAKIR BIN AZMAN KM-Pelajar.pdf", ti: 44, num: 5, total: 49 },
+            { pensyarah: "ABDUL RAZAK BIN AZIT", nama: "TAN JING XUAN", matrik: "MS2616116540", praktikum: "H28", set: "SET 3", pdf: "SET 3_H28_TAN JING XUAN - TAN JING XUAN KM-Pelajar.pdf", ti: 45, num: 5, total: 50 }
+        ];
+
+        let activeStudent = null;
+
+        function getGradeInfo(total) {
+            if (total >= 40) return { grade: 'A', title: 'GRED A (CEMERLANG)', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300', barClass: 'bg-emerald-500' };
+            if (total >= 35) return { grade: 'B', title: 'GRED B (KEPUASAN)', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300', barClass: 'bg-blue-500' };
+            if (total >= 30) return { grade: 'C', title: 'GRED C (LULUS)', badgeClass: 'bg-amber-100 text-amber-800 border-amber-300', barClass: 'bg-amber-500' };
+            if (total >= 25) return { grade: 'D', title: 'GRED D (MEMUASKAN)', badgeClass: 'bg-orange-100 text-orange-800 border-orange-300', barClass: 'bg-orange-500' };
+            return { grade: 'F', title: 'GRED F (GAGAL)', badgeClass: 'bg-red-100 text-red-800 border-red-300', barClass: 'bg-red-500' };
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim().toUpperCase();
+            const clearBtn = document.getElementById('clearBtn');
+            const suggestionsEl = document.getElementById('suggestions');
+            const emptyState = document.getElementById('emptyState');
+            const studentCard = document.getElementById('studentCard');
+            const multipleResultsList = document.getElementById('multipleResultsList');
+
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+                suggestionsEl.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                studentCard.classList.add('hidden');
+                multipleResultsList.classList.add('hidden');
+                return;
+            }
+
+            // Filter database matching Matrik or Name
+            const matches = studentDatabase.filter(s => 
+                s.matrik.toUpperCase().includes(query) || 
+                s.nama.toUpperCase().includes(query)
+            );
+
+            // Populate suggestions dropdown
+            if (matches.length > 0 && query.length >= 2) {
+                suggestionsEl.innerHTML = matches.slice(0, 6).map(s => `
+                    <div onclick="selectStudent('${s.matrik}')" class="p-3 hover:bg-slate-100 cursor-pointer border-b border-slate-100 flex items-center justify-between text-xs sm:text-sm transition">
+                        <div>
+                            <span class="font-bold text-navy-900">${s.nama}</span>
+                            <span class="text-xs text-slate-500 block font-mono">${s.matrik} • ${s.praktikum}</span>
+                        </div>
+                        <span class="bg-navy-100 text-navy-800 px-2 py-0.5 rounded font-semibold text-xs">${s.set}</span>
+                    </div>
+                `).join('');
+                suggestionsEl.classList.remove('hidden');
+            } else {
+                suggestionsEl.classList.add('hidden');
+            }
+
+            if (matches.length === 1) {
+                renderStudentCard(matches[0]);
+            } else if (matches.length > 1) {
+                renderMultipleResults(matches);
+            } else {
+                renderNotFound();
+            }
+        }
+
+        function selectStudent(matrik) {
+            document.getElementById('suggestions').classList.add('hidden');
+            const student = studentDatabase.find(s => s.matrik === matrik);
+            if (student) {
+                document.getElementById('searchInput').value = student.matrik;
+                renderStudentCard(student);
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            handleSearch();
+            document.getElementById('searchInput').focus();
+        }
+
+        function renderStudentCard(student) {
+            activeStudent = student;
+            const emptyState = document.getElementById('emptyState');
+            const studentCard = document.getElementById('studentCard');
+            const multipleResultsList = document.getElementById('multipleResultsList');
+
+            emptyState.classList.add('hidden');
+            multipleResultsList.classList.add('hidden');
+            studentCard.classList.remove('hidden');
+
+            const gradeInfo = getGradeInfo(student.total);
+            const percentage = ((student.total / 50) * 100).toFixed(0);
+
+            studentCard.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition-all duration-300">
+                    <!-- Card Top Accent Banner -->
+                    <div class="bg-navy-900 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-white border-b-4 border-crimson-600">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-crimson-600 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+                                <i class="fa-solid fa-id-badge mr-1"></i> Rekod Ditemui
+                            </span>
+                            <span class="text-xs text-slate-300 font-mono">Kemaskini Terakhir 2026</span>
+                        </div>
+                        <div class="text-xs bg-navy-800 px-3 py-1 rounded-full border border-slate-700">
+                            No Matrik: <strong class="text-amber-400 font-mono">${student.matrik}</strong>
+                        </div>
+                    </div>
+
+                    <div class="p-6 sm:p-8">
+                        <!-- Student Profile Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+                            <div>
+                                <h3 class="text-xl sm:text-2xl font-black text-navy-900 leading-tight">${student.nama}</h3>
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-slate-600 font-medium">
+                                    <span><i class="fa-solid fa-users text-crimson-600 mr-1"></i> Praktikum: <strong class="text-slate-900">${student.praktikum}</strong></span>
+                                    <span>•</span>
+                                    <span><i class="fa-solid fa-file-circle-check text-navy-800 mr-1"></i> Set Soalan: <strong class="text-slate-900">${student.set}</strong></span>
+                                </div>
+                                <div class="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-chalkboard-user text-amber-600"></i> Pensyarah: 
+                                    <strong class="text-navy-900">${student.pensyarah}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Grade Badge -->
+                            <div class="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-slate-200 self-start sm:self-auto">
+                                <div class="text-right">
+                                    <div class="text-xs text-slate-500 font-semibold uppercase">Pangkat/Gred</div>
+                                    <div class="text-sm font-bold text-navy-900">${gradeInfo.grade}</div>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl border ${gradeInfo.badgeClass}">
+                                    ${gradeInfo.grade}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Breakdown Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                            <!-- TI Score -->
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Markah TI (Tugasan Individu)</div>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-2xl sm:text-3xl font-black text-navy-900 font-mono">${student.ti.toFixed(1)}</span>
+                                    <span class="text-xs font-bold text-slate-400">/ 45.0</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full mt-3 overflow-hidden">
+                                    <div class="bg-navy-900 h-full rounded-full" style="width: ${(student.ti / 45) * 100}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Numerical Skill -->
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Numerical Skill</div>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-2xl sm:text-3xl font-black text-navy-900 font-mono">${student.num.toFixed(1)}</span>
+                                    <span class="text-xs font-bold text-slate-400">/ 5.0</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full mt-3 overflow-hidden">
+                                    <div class="bg-crimson-600 h-full rounded-full" style="width: ${(student.num / 5) * 100}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Total Score -->
+                            <div class="bg-gradient-to-br from-navy-900 to-slate-800 text-white rounded-xl p-4 shadow-md">
+                                <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Jumlah Markah</div>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-2xl sm:text-3xl font-black text-amber-400 font-mono">${student.total.toFixed(1)}</span>
+                                    <span class="text-xs font-bold text-slate-400">/ 50.0 (${percentage}%)</span>
+                                </div>
+                                <div class="w-full bg-slate-700 h-2 rounded-full mt-3 overflow-hidden">
+                                    <div class="${gradeInfo.barClass} h-full rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PDF Download Action Button -->
+                        <div class="bg-slate-100 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-200">
+                            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                                <div class="w-10 h-10 bg-crimson-100 text-crimson-600 rounded-lg flex items-center justify-center font-bold text-lg flex-shrink-0">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div class="truncate">
+                                    <span class="text-xs text-slate-500 font-semibold block uppercase">Dokumen Terikat PDF:</span>
+                                    <span class="text-xs sm:text-sm font-mono font-bold text-slate-800 truncate block max-w-xs sm:max-w-md">${student.pdf}</span>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onclick="openPdfModal()" 
+                                class="w-full sm:w-auto bg-crimson-600 hover:bg-crimson-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-lg hover:shadow-crimson-600/30 active:scale-95"
+                            >
+                                <i class="fa-solid fa-eye text-base"></i> 
+                                <span>Lihat & Muat Turun Laporan PDF</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMultipleResults(matches) {
+            const emptyState = document.getElementById('emptyState');
+            const studentCard = document.getElementById('studentCard');
+            const multipleResultsList = document.getElementById('multipleResultsList');
+
+            emptyState.classList.add('hidden');
+            studentCard.classList.add('hidden');
+            multipleResultsList.classList.remove('hidden');
+
+            multipleResultsList.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="bg-navy-900 px-6 py-4 text-white flex justify-between items-center">
+                        <h3 class="font-bold text-sm sm:text-base">
+                            <i class="fa-solid fa-list text-crimson-500 mr-2"></i>Terdapat ${matches.length} Rekod Ditemui
+                        </h3>
+                        <span class="text-xs text-slate-300">Sila pilih nama pelajar untuk maklumat lanjut</span>
+                    </div>
+                    <div class="divide-y divide-slate-200 max-h-96 overflow-y-auto">
+                        ${matches.map(s => `
+                            <div onclick="selectStudent('${s.matrik}')" class="p-4 hover:bg-slate-50 cursor-pointer flex flex-wrap items-center justify-between gap-3 transition">
+                                <div>
+                                    <h4 class="font-bold text-navy-900 text-sm sm:text-base">${s.nama}</h4>
+                                    <div class="text-xs text-slate-500 flex items-center gap-3 mt-1">
+                                        <span>No Matrik: <strong class="font-mono text-slate-700">${s.matrik}</strong></span>
+                                        <span>• Praktikum: <strong>${s.praktikum}</strong></span>
+                                        <span>• Set: <strong>${s.set}</strong></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <span class="text-xs text-slate-400 block">Markah</span>
+                                        <span class="font-mono font-bold text-navy-900 text-sm">${s.total.toFixed(1)} / 50</span>
+                                    </div>
+                                    <span class="bg-navy-900 hover:bg-crimson-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                        Pilih <i class="fa-solid fa-chevron-right ml-1"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNotFound() {
+            const emptyState = document.getElementById('emptyState');
+            const studentCard = document.getElementById('studentCard');
+            const multipleResultsList = document.getElementById('multipleResultsList');
+
+            emptyState.classList.add('hidden');
+            studentCard.classList.add('hidden');
+            multipleResultsList.classList.remove('hidden');
+
+            multipleResultsList.innerHTML = `
+                <div class="bg-white rounded-2xl border border-red-200 p-8 text-center shadow-sm">
+                    <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-navy-900 mb-1">Tiada Rekod Ditemui</h3>
+                    <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                        Sila pastikan No Matrik atau ejaan Nama Pelajar dimasukkan dengan betul.
+                    </p>
+                </div>
+            `;
+        }
+
+        function openPdfModal() {
+            if (!activeStudent) return;
+
+            const modal = document.getElementById('pdfModal');
+            const gradeInfo = getGradeInfo(activeStudent.total);
+
+            // Set modal dynamic content
+            document.getElementById('modalPdfTitle').textContent = activeStudent.pdf;
+            document.getElementById('modalStudentMeta').textContent = `${activeStudent.nama} (${activeStudent.matrik})`;
+            
+            document.getElementById('pdfStudentName').textContent = activeStudent.nama;
+            document.getElementById('pdfStudentMatrik').textContent = activeStudent.matrik;
+            document.getElementById('pdfStudentPraktikum').textContent = activeStudent.praktikum;
+            document.getElementById('pdfStudentSet').textContent = activeStudent.set;
+            document.getElementById('pdfStudentLecturer').textContent = activeStudent.pensyarah;
+
+            document.getElementById('pdfScoreTI').textContent = activeStudent.ti.toFixed(1);
+            document.getElementById('pdfScoreNum').textContent = activeStudent.num.toFixed(1);
+            document.getElementById('pdfScoreTotal').textContent = activeStudent.total.toFixed(1);
+
+            document.getElementById('pdfGradeTitle').textContent = gradeInfo.title;
+            document.getElementById('pdfGradeBadge').textContent = gradeInfo.grade;
+            document.getElementById('pdfFileName').textContent = activeStudent.pdf;
+
+            // Set today date
+            const today = new Date();
+            document.getElementById('pdfCurrentDate').textContent = today.toLocaleDateString('ms-MY');
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // PDF Actions Simulation
+        function downloadPdfFile() {
+            if (!activeStudent) return;
+            
+            // Create dummy blob for simulated pdf download
+            const element = document.createElement('a');
+            const fileContent = `=== KOLEJ MATRIKULASI MALAYSIA ===\nSLIP LAPORAN MARKAH PELAJAR\n\nNama: ${activeStudent.nama}\nNo Matrik: ${activeStudent.matrik}\nPensyarah: ${activeStudent.pensyarah}\nPraktikum: ${activeStudent.praktikum}\nSet Soalan: ${activeStudent.set}\n\nMarkah TI (/45): ${activeStudent.ti}\nNumerical Skill (/5): ${activeStudent.num}\nJUMLAH MARKAH (/50): ${activeStudent.total}\n\nFail Asal: ${activeStudent.pdf}\nDisahkan Rasmi oleh Jabatan Matematik.`;
+            
+            const file = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+            element.href = URL.createObjectURL(file);
+            element.download = activeStudent.pdf.endsWith('.pdf') ? activeStudent.pdf : activeStudent.pdf + '.pdf';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function printPdfDocument() {
+            window.print();
+        }
+
+        function openPdfNewTab() {
+            if (!activeStudent) return;
+            const fileContent = `=== KOLEJ MATRIKULASI MALAYSIA ===%0ANama: ${encodeURIComponent(activeStudent.nama)}%0ANo Matrik: ${activeStudent.matrik}%0AJumlah Markah: ${activeStudent.total}/50`;
+            window.open(`data:text/plain;charset=utf-8,${fileContent}`, '_blank');
+        }
+
+        // Close Modal on Escape Key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePdfModal();
+            }
+        });
+    </script>
+</body>
+</html>
